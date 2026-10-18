@@ -1,6 +1,6 @@
 // Fills the CRM with demo staff, leads on every stage, tasks and history. Runs once per database.
 // Demo staff get random passwords that are never stored: they populate the team, nobody logs in as them.
-// Usage: DB_PATH=./data/crm.sqlite node scripts/seed-demo.mjs   (in Docker: docker exec jumpads-crm node scripts/seed-demo.mjs)
+// Usage: DB_PATH=./data/crm.sqlite node scripts/seed-demo.mjs   (in Docker: docker exec glebgrshncrm node scripts/seed-demo.mjs)
 import { randomBytes, randomUUID } from 'node:crypto';
 import { openStore } from '../src/store.js';
 

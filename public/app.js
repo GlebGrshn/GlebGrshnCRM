@@ -29,7 +29,7 @@ function showLogin(){me=null;authVersion++;$('workspace').hidden=true;$('login')
 function setAuthMode(next){mode=next;$('register-fields').hidden=mode!=='register';$('password-repeat').required=mode==='register';$('reg-telegram').required=mode==='register';$('auth-submit').textContent=mode==='register'?'Создать аккаунт':'Войти в CRM →';$('password').autocomplete=mode==='register'?'new-password':'current-password';$('login-mode').classList.toggle('selected',mode==='login');$('register-mode').classList.toggle('selected',mode==='register');$('login-error').textContent='';}
 function showView(next){view=next;document.querySelectorAll('.view').forEach(e=>e.hidden=e.id!==`${view}-view`);document.querySelectorAll('[data-view]').forEach(e=>e.classList.toggle('nav-active',e.dataset.view===view));$('page-title').textContent=titles[view];$('breadcrumb').textContent=titles[view];$('add').hidden=!['leads','pipeline'].includes(view)||!can('leads:write');$('add-task').hidden=view!=='tasks'||!can('tasks:write');if(view==='messages')loadMessages().catch(e=>toast(e.message));}
 function render(){
- $('current-user').textContent=me.username;$('current-role').textContent=roles[me.role];$('test-banner').hidden=!testRoles;
+ $('current-user').textContent=me.username;$('current-avatar').textContent=me.username.slice(0,2).toUpperCase();$('current-role').textContent=roles[me.role];$('test-banner').hidden=!testRoles;
  const active=leads.filter(l=>!l.archived);$('total').textContent=active.length;$('nav-count').textContent=active.length;$('new-count').textContent=active.filter(l=>l.status==='new').length;$('working-count').textContent=active.filter(l=>['working','proposal'].includes(l.status)).length;$('telegram-count').textContent=active.filter(l=>['telegram','client_bot'].includes(l.source)).length;
  const descriptions={disabled:'Не подключён · CRM работает, уведомления в Telegram не приходят',connecting:'Подключаемся к Telegram…',connected:'Подключён · лиды, задачи и все уведомления CRM для сотрудников в Telegram',conflict:'Конфликт: проверьте webhook и другие экземпляры бота',invalid_token:'Токен не принят. Проверьте настройки на сервере.',retrying:'Связь прервана · повторяем подключение'};
  $('bot-status').textContent=descriptions[bot.state]??'Проверяем подключение…';$('bot-link').hidden=!bot.username;if(bot.username)$('bot-link').href=`https://t.me/${encodeURIComponent(bot.username)}`;
@@ -63,7 +63,7 @@ function renderTeam(){
 function renderNotifications(){
  const unread=notifications.filter(n=>!n.read_at);$('notification-count').textContent=unread.length;
  $('notification-list').innerHTML=notifications.map(n=>`<article class="notification-item ${n.read_at?'read':''}"><b>${esc(n.title)}</b><p>${date(n.remind_at)}</p><button class="button" data-notification-task="${n.task_id}">Открыть задачу</button>${!n.read_at?`<button class="quiet" data-read="${n.id}">Прочитано</button>`:'<small>Прочитано</small>'}</article>`).join('')||'<p class="muted">Напоминаний пока нет. Укажите время напоминания в задаче.</p>';
- for(const n of unread){const key=`${me.id}:${n.id}`;if(seenNotifications.has(key))continue;seenNotifications.add(key);toast(n.title);if('Notification'in window&&Notification.permission==='granted')new Notification('Jumpads — напоминание',{body:n.title,tag:key});}
+ for(const n of unread){const key=`${me.id}:${n.id}`;if(seenNotifications.has(key))continue;seenNotifications.add(key);toast(n.title);if('Notification'in window&&Notification.permission==='granted')new Notification('GlebGrshnCRM — напоминание',{body:n.title,tag:key});}
 }
 async function load(){
  if(loading)return;loading=true;const version=authVersion;$('refresh').disabled=true;
@@ -173,8 +173,8 @@ $('telegram-form').onsubmit=async e=>{
 $('telegram-link').onclick=handle(async()=>{const {url}=await send('/api/me/telegram-link','POST',{});window.open(url,'_blank','noopener');toast('Откройте бота и нажмите «Старт». Ссылка действует 24 часа и только один раз.');});
 // Theme: auto (system) → light → dark; theme.js applies it before the page is drawn.
 const themeNames={auto:'авто',light:'светлая',dark:'тёмная'};
-function renderTheme(){for(const id of ['theme-toggle','login-theme'])$(id).textContent=`◐ Тема: ${themeNames[window.jumpadsTheme.get()]}`;}
-for(const id of ['theme-toggle','login-theme'])$(id).onclick=()=>{const order=['auto','light','dark'];window.jumpadsTheme.set(order[(order.indexOf(window.jumpadsTheme.get())+1)%order.length]);renderTheme();};
+function renderTheme(){for(const id of ['theme-toggle','login-theme'])$(id).textContent=`◐ Тема: ${themeNames[window.crmTheme.get()]}`;}
+for(const id of ['theme-toggle','login-theme'])$(id).onclick=()=>{const order=['auto','light','dark'];window.crmTheme.set(order[(order.indexOf(window.crmTheme.get())+1)%order.length]);renderTheme();};
 renderTheme();
 $('enable-notifications').onclick=handle(async()=>{if(!('Notification'in window)){toast('Этот браузер не поддерживает системные уведомления');return;}const permission=await Notification.requestPermission();toast(permission==='granted'?'Уведомления включены':'Разрешение не получено. Напоминания доступны в CRM.');});
 $('team-chat-tab').onclick=()=>chooseChat('team');$('telegram-chat-tab').onclick=()=>chooseChat('telegram');

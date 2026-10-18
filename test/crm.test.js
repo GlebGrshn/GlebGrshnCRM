@@ -15,7 +15,7 @@ test('manual lead, tag normalization, validation and edit',()=>{
  const s=openStore();try{const l=s.create(lead);assert.deepEqual(l.tags,['реклама']);assert.equal(l.source,'manual');assert.equal(s.update(l.id,{...lead,status:'working',tags:['VIP']}).status,'working');assert.throws(()=>s.create({...lead,name:' '}));assert.throws(()=>s.create({...lead,tags:['x'.repeat(41)]}));assert.throws(()=>s.create({...lead,status:'invalid'}));}finally{s.close();}
 });
 test('client bot request survives restart, creates one tagged lead and delivers retryable replies',async()=>{
- const dir=mkdtempSync(join(tmpdir(),'jumpads-test-'));const file=join(dir,'db.sqlite');let s=openStore(file);
+ const dir=mkdtempSync(join(tmpdir(),'glebgrshncrm-test-'));const file=join(dir,'db.sqlite');let s=openStore(file);
  try{acceptClientUpdate(s,update(1,'/start'));acceptClientUpdate(s,update(2,'Анна'));s.close();s=openStore(file);acceptClientUpdate(s,update(3,'@anna'));acceptClientUpdate(s,update(4,'Нужен сайт'));acceptClientUpdate(s,update(4,'Нужен сайт'));assert.equal(s.list().length,1);assert.equal(s.list()[0].source,'telegram');assert.deepEqual(s.list()[0].tags,['telegram']);assert.equal(s.db.prepare('SELECT count(*) AS n FROM sessions').get().n,0);await assert.rejects(flushOutbox(s,async()=>{throw new Error('network');},'client_bot'));assert.equal(s.db.prepare('SELECT count(*) AS n FROM outbox').get().n,4);const replies=[];await flushOutbox(s,async(method,payload)=>replies.push(payload.text),'client_bot');assert.equal(replies.length,4);assert.match(replies[3],/передана/);s.close();s=openStore(file);assert.equal(s.list().length,1);}finally{s.close();rmSync(dir,{recursive:true,force:true});}
 });
 test('bot cancellation, parallel chats and unsupported messages',()=>{

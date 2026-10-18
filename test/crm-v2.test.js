@@ -55,12 +55,12 @@ test('bot saves repeat requests with a possible-duplicate tag and keeps follow-u
  }finally{s.close();}
 });
 test('accounts, sessions, tasks, messages and reminders persist across reopening database',async()=>{
- const dir=mkdtempSync(join(tmpdir(),'jumpads-v2-'));const path=join(dir,'crm.sqlite');let s=openStore(path);
+ const dir=mkdtempSync(join(tmpdir(),'glebgrshncrm-v2-'));const path=join(dir,'crm.sqlite');let s=openStore(path);
  try{const user=await s.register({username:'admin',password},true);const token=s.session(user);s.saveTask({title:'Сохранённая задача',due_at:'2026-10-01T12:00:00Z',remind_at:'2026-10-01T11:00:00Z'},user);s.addMessage({kind:'team',sender_id:user.id,author:user.username,body:'История чата'});s.tick('2026-10-01T11:30:00Z');s.close();s=openStore(path);assert.equal(s.authenticate(token).username,'admin');assert.equal(s.tasks().length,1);assert.equal(s.notifications(user.id).length,1);s.tick('2026-10-01T11:35:00Z');assert.equal(s.notifications(user.id).length,1);assert.equal(s.messages(user,'team',null).length,1);}finally{s.close();rmSync(dir,{recursive:true,force:true});}
 });
 
 test('v1 migration preserves existing leads and adds CRM fields without reset',async()=>{
- const {DatabaseSync}=await import('node:sqlite');const dir=mkdtempSync(join(tmpdir(),'jumpads-migration-')),file=join(dir,'old.sqlite');const legacy=new DatabaseSync(file);
+ const {DatabaseSync}=await import('node:sqlite');const dir=mkdtempSync(join(tmpdir(),'glebgrshncrm-migration-')),file=join(dir,'old.sqlite');const legacy=new DatabaseSync(file);
  legacy.exec("CREATE TABLE leads (id TEXT PRIMARY KEY,name TEXT NOT NULL,contact TEXT NOT NULL,request TEXT NOT NULL,source TEXT NOT NULL,status TEXT NOT NULL,tags TEXT NOT NULL,created_at TEXT NOT NULL)");
  legacy.prepare('INSERT INTO leads VALUES (?,?,?,?,?,?,?,?)').run('legacy-lead','Анна','@anna','Старый запрос','manual','new','["старый"]','2026-09-01T00:00:00Z');legacy.close();
  const s=openStore(file);try{assert.equal(s.list().length,1);assert.equal(s.get('legacy-lead').name,'Анна');assert.deepEqual(s.get('legacy-lead').tags,['старый']);assert.equal(s.get('legacy-lead').archived,0);s.update('legacy-lead',{company:'Компания',budget:50000});assert.equal(s.get('legacy-lead').budget,50000);assert.equal(s.create(lead('@new')).source,'manual');}finally{s.close();rmSync(dir,{recursive:true,force:true});}

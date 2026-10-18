@@ -26,7 +26,7 @@ test('event rules match AND/OR filters, execute ordered actions once, suppress r
 });
 
 test('pause and next step survive database restart, completed steps are not repeated',async()=>{
- const dir=mkdtempSync(join(tmpdir(),'jumpads-auto-')),path=join(dir,'crm.sqlite');let store;
+ const dir=mkdtempSync(join(tmpdir(),'glebgrshncrm-auto-')),path=join(dir,'crm.sqlite');let store;
  try{
   const f=await fixture(path);store=f.store;f.auto.save(rule({actions:[{type:'team',value:'Первый'},{type:'wait',minutes:5},{type:'team',value:'Последний'}]}),f.user);store.create(leadInput);
   const now=new Date(Date.now()+1000).toISOString();f.auto.tick(now);f.auto.tick(now);assert.equal(f.auto.runs()[0].step,2);store.close();

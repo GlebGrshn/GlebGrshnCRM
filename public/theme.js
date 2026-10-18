@@ -6,7 +6,7 @@
   const apply = () => { document.documentElement.dataset.theme = choice === 'auto' ? (media.matches ? 'dark' : 'light') : choice; };
   apply();
   media.addEventListener('change', () => { if (choice === 'auto') apply(); });
-  window.jumpadsTheme = {
+  window.crmTheme = {
     get: () => choice,
     set(next) { choice = next; try { localStorage.setItem('theme', next); } catch { /* still applied for this page */ } apply(); }
   };

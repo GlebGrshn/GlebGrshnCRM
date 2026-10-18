@@ -143,7 +143,7 @@ export function handleStaffUpdate(store,update,{clientBot}={}){
  const link=/^\/start(?:@\w+)?\s+staff_([\w-]+)$/.exec(text),staff=(link&&store.consumeStaffLink(link[1],from))||store.staffByTelegram(from);
  if(!staff){
   const client=clientBot?.username?`@${clientBot.username}`:'клиентском боте агентства';
-  say(`${link?'Ссылка привязки недействительна или устарела — получите новую в профиле CRM.\n\n':''}Это рабочий бот команды Jumpads CRM.\n\nКлиентам: оставить заявку можно в ${client}.\nСотрудникам: укажите свой Telegram в CRM («Команда и роли» → профиль) и снова напишите сюда /start.`);
+  say(`${link?'Ссылка привязки недействительна или устарела — получите новую в профиле CRM.\n\n':''}Это рабочий бот команды GlebGrshnCRM.\n\nКлиентам: оставить заявку можно в ${client}.\nСотрудникам: укажите свой Telegram в CRM («Команда и роли» → профиль) и снова напишите сюда /start.`);
   return;
  }
  const key=`staff:${chat}`;
