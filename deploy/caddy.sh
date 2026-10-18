@@ -1,5 +1,7 @@
 #!/bin/sh
 # (Re)create the Caddy container: HTTPS for lushik.online, certificates kept in the caddy-data volume.
+# If this Caddy also serves other sites on the server, keep their extra -v mounts: the server copy of this
+# script (/opt/glebgrshncrm/caddy.sh) is the one to run there, not this CRM-only template.
 set -e
 docker rm -f caddy >/dev/null 2>&1 || true
 docker run -d --name caddy --restart always --network host --log-opt max-size=10m --log-opt max-file=3 \
